@@ -1,0 +1,10 @@
+{
+  "project": "23l-0829_A2_Ops",
+  "dataset": "cashbowman/ai-generated-images-vs-real-images",
+  "version": 1,
+  "download_url": "https://www.kaggle.com/api/v1/datasets/download/cashbowman/ai-generated-images-vs-real-images?datasetVersionNumber=1",
+  "recorded_at_utc": "2026-11-08T11:32:02.528935+00:00",
+  "archive_sha256": "de9243eaa0170bd2bc85963e9141e82158382f950416667eed3d7cdaefce2653",
+  "archive_bytes": 499048119,
+  "extracted_files": 975
+}
