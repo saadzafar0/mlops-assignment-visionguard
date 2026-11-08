@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: 23l-0829-a2-ops-inference
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: PROJECT_NAME
+        value: 23l-0829_A2_Ops
+      - key: INFERENCE_API_KEY
+        sync: false
+      - key: API_REQUIRE_KEY
+        value: "true"
+      - key: INFERENCE_BACKEND
+        value: tensorflow-serving

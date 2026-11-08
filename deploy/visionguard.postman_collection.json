@@ -1,0 +1,51 @@
+{
+  "info": {
+    "name": "23l-0829_A2_Ops — VisionGuard inference",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Set base_url to the deployed HTTPS service and api_key privately. Never export a populated secret. Select local validation images in the form-data fields."
+  },
+  "variable": [
+    {"key": "base_url", "value": "https://YOUR-ACTUAL-SERVICE.onrender.com"},
+    {"key": "api_key", "value": ""}
+  ],
+  "item": [
+    {
+      "name": "Model health",
+      "request": {"method": "GET", "url": "{{base_url}}/health"},
+      "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": [
+        "pm.test('Model is available', () => { pm.response.to.have.status(200); pm.expect(pm.response.json().model_loaded).to.eql(true); });"
+      ]}}]
+    },
+    {
+      "name": "Predict validation image — select JPEG or PNG",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/predict",
+        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{api_key}}", "type": "string"}]},
+        "body": {"mode": "formdata", "formdata": [{"key": "image", "type": "file", "src": []}]}
+      },
+      "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": [
+        "pm.test('Prediction contains champion metadata', () => { pm.response.to.have.status(200); const r = pm.response.json(); pm.expect(r.model_version).to.eql('2'); pm.expect(r.label).to.be.oneOf(['real', 'ai']); pm.expect(r.probability_ai).to.be.within(0, 1); pm.expect(r).to.have.property('request_id'); });"
+      ]}}]
+    },
+    {
+      "name": "Missing key is rejected",
+      "request": {"method": "POST", "url": "{{base_url}}/predict", "auth": {"type": "noauth"}},
+      "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": [
+        "pm.test('Requires authentication', () => pm.response.to.have.status(401));"
+      ]}}]
+    },
+    {
+      "name": "Corrupt JPEG is rejected — select a broken .jpg file",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/predict",
+        "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{api_key}}", "type": "string"}]},
+        "body": {"mode": "formdata", "formdata": [{"key": "image", "type": "file", "src": []}]}
+      },
+      "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": [
+        "pm.test('Rejects undecodable image', () => pm.response.to.have.status(422));"
+      ]}}]
+    }
+  ]
+}

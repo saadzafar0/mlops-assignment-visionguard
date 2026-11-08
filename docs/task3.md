@@ -105,11 +105,12 @@ The independent `python scripts/predict_by_alias.py` loads
 preprocessing function, and prints the model version, label, `p(AI)`, threshold,
 and predicted-class score. An explicit image can be supplied through `--image`.
 
-The future server uses the validated local `models/champion/model.keras` plus its
-manifest. A deployment preparation step retrieves the chosen version once or pulls
-the DVC artifact; each HTTP request reuses the in-memory model. The web app must
-not contact DagsHub per prediction. Alias lookup is a demonstration and deployment
-operation, not part of the per-request serving path.
+The local Flask server uses the validated `models/champion/model.keras` plus its
+manifest and reuses the loaded model across requests. The cloud Docker build
+retrieves the pinned artifact once and exports its unchanged inference graph for
+TensorFlow Serving. The web app does not contact DagsHub per prediction. Alias
+lookup is a demonstration and deployment operation, not part of the per-request
+serving path. See [Tasks 4–5](task4_5.md) and [deployment](deployment.md).
 
 Required evidence: registry page showing at least two versions and `champion`,
 then terminal output from the separate alias-loading script.

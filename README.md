@@ -19,7 +19,10 @@ and [image-specific error analysis](docs/error_analysis.md). Six controlled runs
 eight tuning trials, and final test evaluation have completed. The tuned MobileNetV2
 champion achieved **75.51% test accuracy and 0.9126 ROC-AUC** at its validation-selected
 threshold. [Task 3](docs/task3.md) records the two registry versions and verified
-`champion` alias. The web application, database, Docker, CI, and deployment follow.
+`champion` alias. The Flask upload/result/history pages and durable database are
+implemented and tested. See [Tasks 4–5](docs/task4_5.md) and
+[inference hosting](docs/deployment.md) for local use and the free Render deployment.
+Cloud deployment, Compose runtime evidence, CI, and report screenshots remain pending.
 
 ## Environment
 
@@ -173,8 +176,54 @@ python scripts/predict_by_alias.py
 ```
 
 The second command demonstrates registry lookup and inference on one validation
-image (so it also needs that image locally). Future serving code will load the
-local `models/champion/model.keras` and `manifest.json` once at startup.
+image (so it also needs that image locally). Local Flask serving loads the champion
+and its manifest once at startup.
+
+## Flask application and history
+
+With the environment active and the champion available:
+
+```bash
+gunicorn --bind 127.0.0.1:5000 --workers 1 --threads 2 --timeout 180 \
+  'visionguard.webapp:create_app()'
+```
+
+Open <http://127.0.0.1:5000>. Upload a JPEG or PNG up to **5 MiB / 4 million
+pixels**. The result shows the label, predicted-class score, AI score, decision
+threshold, and model version. The history menu reads persistent database records.
+Uploaded image bytes are processed in memory; they are never saved to disk.
+Scores are experimental model estimates, not proof of an image's origin.
+
+Native execution uses SQLite at `.cache/history.db`; `DATABASE_URL` also accepts
+PostgreSQL. The Compose stack provides PostgreSQL with a named volume:
+
+```bash
+# First set a strong POSTGRES_PASSWORD in the ignored .env.
+docker compose up --build -d
+docker compose logs -f web
+```
+
+The web service listens on localhost only. PostgreSQL publishes no host port.
+Compose syntax is validated; full stack runtime verification is pending because
+this machine currently cannot create Docker bridge network interfaces.
+
+## Inference hosting
+
+The chosen host is a **Render Free Docker web service** running the model API.
+Flask and its persistent database stay local, as required by Task 7. The default
+Docker target uses TensorFlow Serving's C++ runtime and a thin Flask API, avoiding
+the large Python TensorFlow process on the free instance. The model, weights,
+preprocessing, and threshold are unchanged.
+
+```bash
+docker build --target inference -t visionguard-inference .
+```
+
+[`render.yaml`](render.yaml) declares a free service. Deployment instructions,
+API configuration, cold-start behavior, and evidence requirements are in
+[docs/deployment.md](docs/deployment.md). After obtaining its actual HTTPS URL,
+set `INFERENCE_BACKEND=remote`, `INFERENCE_API_URL`, and the matching
+`INFERENCE_API_KEY` in the local ignored `.env`, then restart Flask.
 
 ## Checks
 
@@ -191,6 +240,9 @@ Six training tests verify grayscale/RGB padding, MobileNet preprocessing and
 layer freezing, saved-model round trips with augmentation disabled, and the
 validation threshold/error-cost policy, selection independent of test scores,
 and preventing test inference after evaluation has completed.
+The serving tests cover rejected uploads, memory-only multipart streams,
+persistent history across application restarts, request auditing, API-key
+authentication, remote-response validation, and unavailable-service behavior.
 
 ## Submission evidence
 
