@@ -51,6 +51,10 @@ def make_dataset(name: str, image_size: int = 128, batch_size: int = 32, seed: i
     cache = PROJECT_ROOT / f".cache/tfdata/{digest}/{name}_{image_size}"
     cache.parent.mkdir(parents=True, exist_ok=True)
     dataset = dataset.cache(str(cache))
+    if not Path(f"{cache}.index").exists():
+        # Fully populate the finite cache before previews or Keras stop an iterator.
+        for _ in dataset.batch(64):
+            pass
     if name == "train":
         dataset = dataset.shuffle(len(table), seed=seed, reshuffle_each_iteration=True)
     options = tf.data.Options()

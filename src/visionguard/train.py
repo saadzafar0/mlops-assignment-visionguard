@@ -57,8 +57,14 @@ def data_version() -> str:
     return yaml.safe_load((PROJECT_ROOT / "data/raw.dvc").read_text())["outs"][0]["md5"]
 
 
-def log_reproducibility() -> None:
-    mlflow.set_tags({"git_commit": git_commit(), "dvc_data_version": data_version(), "seed": "42"})
+def log_reproducibility(source_commit: str | None = None, seed: int = 42) -> None:
+    mlflow.set_tags(
+        {
+            "git_commit": source_commit or git_commit(),
+            "dvc_data_version": data_version(),
+            "seed": str(seed),
+        }
+    )
     for name in ("train", "validation", "test"):
         mlflow.log_artifact(str(SPLITS / f"{name}.csv"), "splits")
     for filename in ("params.yaml", "pyproject.toml", "uv.lock", "data/raw.dvc"):
@@ -202,6 +208,8 @@ def train_candidate(spec: TrainingSpec, target: str = "dagshub") -> dict:
         raise ValueError(f"Completed candidate already exists: {spec.name}")
     output.mkdir(parents=True, exist_ok=True)
     model_dir.mkdir(parents=True, exist_ok=True)
+    source_commit = git_commit()
+    tf.keras.backend.clear_session()
     configure_runtime(spec.seed)
     configure_tracking(target)
     mlflow.tensorflow.autolog(disable=True)
@@ -224,7 +232,7 @@ def train_candidate(spec: TrainingSpec, target: str = "dagshub") -> dict:
             {"purpose": "visionguard-candidate", "approach": spec.model, "logging": spec.logging}
         )
         mlflow.log_params(asdict(spec))
-        log_reproducibility()
+        log_reproducibility(source_commit, spec.seed)
         if spec.augment:
             save_augmented_batch(train, output / "augmented_batch.png", spec.seed)
             mlflow.log_artifact(str(output / "augmented_batch.png"))
@@ -279,16 +287,16 @@ def train_candidate(spec: TrainingSpec, target: str = "dagshub") -> dict:
             "model_path": str(model_path),
             "model_sha256": hashlib.sha256(model_path.read_bytes()).hexdigest(),
             "dvc_data_version": data_version(),
-            "git_commit": git_commit(),
+            "git_commit": source_commit,
         }
-        (output / "result.json").write_text(json.dumps(result, indent=2) + "\n")
         mlflow.log_metrics({f"validation_{key}": value for key, value in metrics.items()})
         mlflow.log_param("decision_threshold", threshold["threshold"])
         mlflow.log_artifact(str(output / "validation_predictions.csv"))
-        mlflow.log_artifact(str(output / "result.json"))
         mlflow.log_artifact(str(model_path), "keras_model")
         example = next(iter(validation))[0][:2].numpy()
         log_native_model(model, example)
+        (output / "result.json").write_text(json.dumps(result, indent=2) + "\n")
+        mlflow.log_artifact(str(output / "result.json"))
     mlflow.tensorflow.autolog(disable=True)
     print(json.dumps(result, indent=2), flush=True)
     return result
