@@ -2,6 +2,7 @@
 
 import numpy as np
 
+from visionguard.evaluate import select_by_validation
 from visionguard.metrics import binary_metrics, choose_threshold
 from visionguard.models import build_baseline, build_transfer, unfreeze_last_block
 from visionguard.pipeline import decode_and_resize
@@ -57,3 +58,17 @@ def test_roc_auc_uses_probabilities_and_threshold_cost_penalises_false_accusatio
     assert metrics["false_positive"] == 0
     assert metrics["false_negative"] == 1
     assert metrics["roc_auc"] == 0.75
+
+
+def test_final_selection_ignores_test_performance():
+    validation_winner = {
+        "validation": {"roc_auc": 0.9},
+        "threshold_selection": {"validation_cost": 20},
+        "test": {"accuracy": 0.1},
+    }
+    test_winner = {
+        "validation": {"roc_auc": 0.7},
+        "threshold_selection": {"validation_cost": 30},
+        "test": {"accuracy": 0.99},
+    }
+    assert select_by_validation([test_winner, validation_winner]) is validation_winner

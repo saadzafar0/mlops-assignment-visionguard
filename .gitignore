@@ -16,7 +16,9 @@ mlflow.db
 data/downloads/
 data/raw/
 data/processed/
-models/
+models/*
+!models/*.dvc
 labs/work/
-reports/generated/
+reports/generated/*
+!reports/generated/*.dvc
 *.log

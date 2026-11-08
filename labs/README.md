@@ -81,3 +81,22 @@ The remote repetition completed successfully with final validation loss 0.150037
 and accuracy 95.00%, matching the local run at the same learning rate.
 [DagsHub run `2f366ee2f8c148b89b249bdb3da7b338`](https://dagshub.com/saadzafar0/mlops-assignment-visionguard.mlflow/#/experiments/0/runs/2f366ee2f8c148b89b249bdb3da7b338)
 contains the epoch metrics, plot, split indices, source snapshot, and native model.
+
+## Keras Tuner exercise (Task 2.7)
+
+`python labs/tuner_toy.py` searches learning rate and hidden-unit count on the
+bundled digits dataset. Random search ran four trials, each for four epochs,
+using seed 42 and the same stratified 1437/360 training/validation split.
+
+| Units | Learning rate | Best validation accuracy |
+| ---: | ---: | ---: |
+| 32 | 0.001 | 68.61% |
+| 64 | 0.001 | 83.06% |
+| 64 | 0.01 | 95.83% |
+| 16 | 0.001 | 46.67% |
+
+The best settings were **64 units and learning rate 0.01** for this short toy
+budget. `reports/generated/tuner_toy/trials.csv` and `best.json` contain the
+results. The VisionGuard search is separate: it warm-starts from the frozen
+MobileNetV2 head and tunes learning rate, dropout, and trainable tail size over
+at least eight completed trials, as described in `docs/task2.md`.

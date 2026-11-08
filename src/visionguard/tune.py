@@ -43,6 +43,7 @@ def main():
     args = parser.parse_args()
     configure_runtime()
     configure_tracking(args.target)
+    source_commit = git_commit()
     mlflow.tensorflow.autolog(disable=True)
     params = load_params()
     config = params["tuning"]
@@ -51,9 +52,7 @@ def main():
         raise SystemExit("Complete transfer-reference training before tuning.")
     reference = json.loads(reference_path.read_text())
     spec = TrainingSpec(**reference["spec"])
-    checkpoint = next(
-        stage["checkpoint"] for stage in reference["stages"] if stage["stage"] == "frozen_head"
-    )
+    checkpoint = str(PROJECT_ROOT / "models/runs/transfer-reference/frozen_head/best.keras")
     output = PROJECT_ROOT / "reports/generated/training/transfer-tuned"
     if (output / "result.json").exists():
         raise SystemExit("Completed tuning results already exist; refusing to overwrite.")
@@ -75,7 +74,7 @@ def main():
         mlflow.set_tags(
             {"purpose": "visionguard-candidate", "approach": "transfer", "selection": "keras-tuner"}
         )
-        log_reproducibility()
+        log_reproducibility(source_commit, spec.seed)
         mlflow.log_params(
             {
                 "max_trials": config["max_trials"],
@@ -129,6 +128,7 @@ def main():
             table["label"], probabilities, params["training"]["false_positive_cost"]
         )
         spec.name = "transfer-tuned"
+        spec.logging = "manual"
         spec.dropout = best_hp.get("dropout")
         spec.unfrozen_layers = best_hp.get("unfrozen_layers")
         spec.fine_tune_learning_rate = best_hp.get("learning_rate")
@@ -150,10 +150,9 @@ def main():
             "model_path": str(model_path),
             "model_sha256": hashlib.sha256(model_path.read_bytes()).hexdigest(),
             "dvc_data_version": data_version(),
-            "git_commit": git_commit(),
+            "git_commit": source_commit,
             "tuner_best": best_hp.values,
         }
-        (output / "result.json").write_text(json.dumps(result, indent=2) + "\n")
         mlflow.log_metrics(
             {f"validation_{key}": value for key, value in result["validation"].items()}
         )
@@ -174,6 +173,8 @@ def main():
             }
         (output / "hyperparameter_effects.json").write_text(json.dumps(effects, indent=2) + "\n")
         mlflow.log_dict(effects, "hyperparameter_effects.json")
+        (output / "result.json").write_text(json.dumps(result, indent=2) + "\n")
+        mlflow.log_artifact(str(output / "result.json"))
     print(json.dumps(result, indent=2), flush=True)
 
 

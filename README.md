@@ -13,8 +13,9 @@ Task 1's data audit, EDA, reproducible splits, and local DVC exercise have been 
 The dataset and pipeline outputs have been uploaded to DagsHub DVC storage.
 See [measured results](docs/task1_results.md), [Task 1 explanations](docs/task1.md),
 and [DagsHub connection checks](docs/tracking_setup.md). Required screenshots and
-publishing the toy commits remain outstanding. Model training, the web application,
-database, Docker, CI, and deployment are the next phases.
+publishing the toy commits remain outstanding. Task 2 training tools and report
+notes are in [model development](docs/task2.md); the web application, database,
+Docker, CI, and deployment follow model selection.
 
 ## Environment
 
@@ -138,6 +139,28 @@ initialisation seeds, and six epochs. Each logs per-epoch metrics, a plot, split
 indices, and a native MLflow TensorFlow model. Results and evidence instructions
 are documented in [the tool labs](labs/README.md).
 
+## Model training and tuning
+
+Activate `.venv` and configure `.env` before running:
+
+```bash
+python scripts/train_comparison.py
+python labs/tuner_toy.py
+python -m visionguard.tune
+python -m visionguard.evaluate
+```
+
+The comparison command resumes matching completed runs. It trains three custom
+CNN variants and three MobileNetV2 variants with frozen-head and fine-tuning
+stages. The real Keras Tuner exercise performs at least eight fine-tuning trials.
+Only training and validation data inform these choices. The evaluation command
+locks selections and thresholds before the first test prediction and preserves
+completed evaluation results. Do not use test results to rerun tuning.
+
+See [Task 2 notes](docs/task2.md) for preprocessing, model design, error costs,
+logging, and evidence instructions. Model files stay outside Git; DagsHub runs
+contain the trained models and their metadata.
+
 ## Checks
 
 ```bash
@@ -149,6 +172,9 @@ pytest -q
 The seven data tests cover corruption, exact duplicates, conflicting labels,
 unknown folders, dot-prefixed image filenames, decoded formats, deterministic
 splits, and absence of shared hashes between splits.
+Five training tests verify grayscale/RGB padding, MobileNet preprocessing and
+layer freezing, saved-model round trips with augmentation disabled, and the
+validation threshold/error-cost policy, and selection independent of test scores.
 
 ## Submission evidence
 
