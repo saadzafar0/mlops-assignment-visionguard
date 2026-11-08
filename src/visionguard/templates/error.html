@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block title %}Could not complete check · VisionGuard{% endblock %}
+{% block content %}
+<section class="card error-card"><span class="eyebrow">{{ status }}</span><h1>Let’s try that again.</h1><p>{{ message }}</p><a class="button primary" href="{{ url_for('upload_page') }}">Back to image check</a></section>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Result · VisionGuard{% endblock %}
+{% block content %}
+<section class="page-heading"><span class="eyebrow">IMAGE CHECK</span><h1>Your result.</h1><p>{{ result.filename }}</p></section>
+<section class="card result-card">
+  <div class="result-heading">
+    <span class="verdict-tag {{ result.label }}">{{ 'AI-generated' if result.label == 'ai' else 'Real / human-created' }}</span>
+    <span class="model-tag">Model v{{ result.model_version }}</span>
+  </div>
+  <h2>{{ 'Resembles AI-generated content.' if result.label == 'ai' else 'Resembles real, human-created content.' }}</h2>
+  <div class="scores">
+    <div><span class="score-label">Score for this verdict</span><strong>{{ "%.1f"|format(result.confidence * 100) }}<small>%</small></strong></div>
+    <div><span class="score-label">AI-generation score</span><strong>{{ "%.1f"|format(result.probability_ai * 100) }}<small>%</small></strong></div>
+  </div>
+  <div class="score-meter" role="meter" aria-label="AI-generation score" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ result.probability_ai * 100 }}">
+    <span style="width:{{ result.probability_ai * 100 }}%"></span>
+    <i style="left:{{ result.threshold * 100 }}%" title="AI decision threshold"></i>
+  </div>
+  <p class="fine-print">An AI label requires an AI-generation score of at least {{ "%.1f"|format(result.threshold * 100) }}%. This cautious threshold reduces false accusations. Scores are not calibrated probabilities.</p>
+  <dl class="result-details"><div><dt>Checked</dt><dd>{{ result.created_at|localtime }}</dd></div><div><dt>Model</dt><dd>{{ result.model_name }} · v{{ result.model_version }}</dd></div><div><dt>Image</dt><dd>{{ result.width }} × {{ result.height }} · {{ result.image_format }}</dd></div></dl>
+  <div class="notice"><p>{{ caveat }}</p></div>
+  <div class="actions"><a class="button primary" href="{{ url_for('upload_page') }}">Check another image</a><a class="button secondary" href="{{ url_for('history') }}">View history</a></div>
+</section>
+{% endblock %}

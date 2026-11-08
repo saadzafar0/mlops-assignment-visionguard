@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="intro">
+  <span class="eyebrow">AI OR REAL?</span>
+  <h1>A second look at<br>your image.</h1>
+  <p>Upload an image to check whether it resembles AI-generated or real, human-created content.</p>
+</section>
+<section class="upload-layout">
+  <form class="card upload-card" action="{{ url_for('predict') }}" method="post" enctype="multipart/form-data" id="upload-form">
+    <label class="drop-zone" for="image">
+      <span class="upload-symbol" aria-hidden="true">↑</span>
+      <strong>Choose an image to check</strong>
+      <span>JPEG or PNG · up to {{ max_upload_mb }} MB</span>
+      <input type="file" name="image" id="image" accept="image/jpeg,image/png" required>
+    </label>
+    <div id="selection" class="selection" aria-live="polite">No image selected</div>
+    <img id="preview" class="preview" alt="Selected image preview" hidden>
+    <button class="button primary" type="submit" id="check-button">Check image <span aria-hidden="true">↗</span></button>
+    <p class="fine-print" id="progress-message">Maximum resolution: {{ "{:,}".format(max_pixels) }} pixels. Images are processed in memory and are not saved.</p>
+    {% if remote_inference %}<p class="fine-print">The first check may take about a minute while the free inference service wakes up.</p>{% endif %}
+  </form>
+  <aside class="guide">
+    <h2>A score, with context.</h2>
+    <ol>
+      <li><strong>Choose your image.</strong><span>Use the original image when you can.</span></li>
+      <li><strong>Read the result.</strong><span>See the verdict and model scores.</span></li>
+      <li><strong>Keep the bigger picture.</strong><span>A detector cannot establish provenance on its own.</span></li>
+    </ol>
+    <div class="notice"><strong>Know the limits</strong><p>{{ caveat }}</p></div>
+  </aside>
+</section>
+{% endblock %}

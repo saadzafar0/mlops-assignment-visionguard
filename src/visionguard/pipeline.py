@@ -6,16 +6,10 @@ from pathlib import Path
 import pandas as pd
 
 from visionguard.config import PROJECT_ROOT, dataset_root
+from visionguard.preprocessing import decode_and_resize
 from visionguard.runtime import tf
 
 SPLITS = PROJECT_ROOT / "data/processed/splits"
-
-
-def decode_and_resize(encoded, image_size: int):
-    image = tf.io.decode_image(encoded, channels=3, expand_animations=False)
-    image = tf.ensure_shape(image, (None, None, 3))
-    image = tf.image.resize_with_pad(image, image_size, image_size, antialias=True)
-    return tf.clip_by_value(image, 0.0, 255.0)
 
 
 def read_split(name: str) -> pd.DataFrame:

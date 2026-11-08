@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}History · VisionGuard{% endblock %}
+{% block content %}
+<section class="page-heading"><span class="eyebrow">YOUR CHECKS</span><h1>Prediction history.</h1><p>{{ total }} saved {{ 'check' if total == 1 else 'checks' }}. Image files are not stored.</p></section>
+<section class="card history-card">
+  {% if rows %}
+  <div class="table-scroll"><table>
+    <thead><tr><th>Image</th><th>Verdict</th><th>Verdict score</th><th>AI score</th><th>Model</th><th>Checked</th></tr></thead>
+    <tbody>{% for row in rows %}<tr>
+      <td><a class="filename" href="{{ url_for('result_page', identifier=row.id) }}">{{ row.filename }}</a></td>
+      <td><span class="verdict-tag {{ row.label }}">{{ 'AI-generated' if row.label == 'ai' else 'Real' }}</span></td>
+      <td>{{ "%.1f"|format(row.confidence * 100) }}%</td><td>{{ "%.1f"|format(row.probability_ai * 100) }}%</td>
+      <td>{{ row.model_name }}<span class="subtle">Version {{ row.model_version }}</span></td><td>{{ row.created_at|localtime }}</td>
+    </tr>{% endfor %}</tbody>
+  </table></div>
+  <div class="pagination"><span>Page {{ page }}</span><div>{% if page > 1 %}<a href="{{ url_for('history', page=page-1) }}">← Previous</a>{% endif %}{% if has_next %}<a href="{{ url_for('history', page=page+1) }}">Next →</a>{% endif %}</div></div>
+  {% else %}<div class="empty-state"><h2>No checks yet.</h2><p>Your first image check will appear here.</p><a class="button primary" href="{{ url_for('upload_page') }}">Check an image</a></div>{% endif %}
+</section>
+{% endblock %}
