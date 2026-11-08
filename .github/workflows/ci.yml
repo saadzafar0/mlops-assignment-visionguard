@@ -102,7 +102,14 @@ jobs:
             echo 'The deliberately wrong password unexpectedly succeeded.'
             exit 1
           fi
-          rg 'password authentication failed' /tmp/visionguard-wrong-db.log
+          python3 - <<'PY'
+          from pathlib import Path
+          log = Path('/tmp/visionguard-wrong-db.log').read_text()
+          matches = [line for line in log.splitlines() if 'password authentication failed' in line]
+          if not matches:
+              raise RuntimeError('Expected database-authentication error was absent:\n' + log)
+          print('\n'.join(matches))
+          PY
           docker compose --project-name visionguard-ci exec -T web python -c \
             'from visionguard.database import Database; from visionguard.serving_config import settings; assert Database(settings()["DATABASE_URL"]).healthy(); print("Correct environment restores database connectivity.")'
       - name: Restart services and verify stored history remains
