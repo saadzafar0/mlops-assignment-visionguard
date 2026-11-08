@@ -1,0 +1,13 @@
+project:
+  name: 23l-0829_A2_Ops
+  roll_number: 23l-0829
+  dataset: cashbowman/ai-generated-images-vs-real-images
+data:
+  root: data/raw
+  seed: 42
+  validation_fraction: 0.15
+  test_fraction: 0.15
+  # Matching is case-insensitive. Unknown folder names fail instead of guessing.
+  class_aliases:
+    real: [real, real images, real_images, realimages, human, human images]
+    ai: [ai, ai images, ai_images, ai-generated, ai_generated, ai generated, fake, fake images, fake_images, artificial]
