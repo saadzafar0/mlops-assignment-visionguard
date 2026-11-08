@@ -33,6 +33,10 @@ meet Task 3.1's two trained Keras runs, Task 3.3's manual/autologging comparison
 Task 3.5's six VisionGuard experiments, or Task 3.6's registry exercise. Those
 remain part of the next model-development phase.
 
+The separate [MLflow training lab](../labs/README.md) has since completed both
+local Keras runs with learning rates 0.001 and 0.01. See its measured comparison
+table and `labs/mlflow_toy.py`; UI screenshots remain required.
+
 ## Terms for the report
 
 - **Experiment:** a named group of related training attempts.
