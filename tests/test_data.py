@@ -77,3 +77,24 @@ def test_unknown_class_prevents_splitting(dataset, tmp_path):
     audit_dataset(dataset, audit, ALIASES)
     with pytest.raises(ValueError, match="unknown class"):
         create_splits(audit / "audit.csv", tmp_path / "splits", 42, 0.15, 0.15)
+
+
+def test_dot_prefixed_images_are_audited(dataset, tmp_path):
+    Image.new("RGB", (7, 9), (23, 45, 67)).save(dataset / "nested/real/.hidden.png")
+    output = tmp_path / "audit"
+    result = audit_dataset(dataset, output, ALIASES)
+    assert result["total_files"] == result["readable_images"] == 41
+    table = pd.read_csv(output / "audit.csv")
+    assert "nested/real/.hidden.png" in set(table["path"])
+
+
+def test_format_is_decoded_instead_of_inferred_from_suffix(dataset, tmp_path):
+    Image.new("RGB", (7, 9), (14, 24, 34)).save(
+        dataset / "nested/real/misleading.webp", format="JPEG"
+    )
+    output = tmp_path / "audit"
+    audit_dataset(dataset, output, ALIASES)
+    table = pd.read_csv(output / "audit.csv")
+    row = table.loc[table["path"] == "nested/real/misleading.webp"].iloc[0]
+    assert row["format"] == "JPEG"
+    assert row["status"] == "ok"

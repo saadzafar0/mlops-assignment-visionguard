@@ -1,4 +1,4 @@
-"""Walk all non-hidden dataset files, decode images, and identify exact duplicates."""
+"""Walk every dataset file, decode images, and identify exact duplicates."""
 
 import argparse
 import hashlib
@@ -72,11 +72,7 @@ def audit_dataset(root: Path, output: Path, aliases: dict, workers: int = 4) -> 
     root = root.resolve()
     if not root.is_dir():
         raise ValueError(f"Dataset directory does not exist: {root}")
-    files = sorted(
-        path
-        for path in root.rglob("*")
-        if path.is_file() and not any(p.startswith(".") for p in path.relative_to(root).parts)
-    )
+    files = sorted(path for path in root.rglob("*") if path.is_file())
     if not files:
         raise ValueError(
             f"No dataset files found in {root}. Download and extract Kaggle data first."
