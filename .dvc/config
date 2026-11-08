@@ -1,0 +1,7 @@
+[core]
+remote = dagshub
+analytics = false
+
+[remote "dagshub"]
+url = s3://dvc
+endpointurl = https://dagshub.com/saadzafar0/mlops-assignment-visionguard.s3
