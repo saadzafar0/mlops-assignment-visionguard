@@ -1,0 +1,6 @@
+outs:
+- md5: 9033ae442346e38750a5db6ac10b1a5a.dir
+  size: 95131
+  nfiles: 3
+  hash: md5
+  path: comparison

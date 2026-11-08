@@ -21,7 +21,9 @@ def main():
     configure_tracking("dagshub")
     name = "23l-0829_A2_Ops"
     version = mlflow.MlflowClient().get_model_version_by_alias(name, "champion")
-    model = mlflow.tensorflow.load_model(f"models:/{name}@champion")
+    model = mlflow.tensorflow.load_model(
+        f"models:/{name}@champion", keras_model_kwargs={"compile": False}
+    )
     path = args.image or dataset_root() / read_split("validation").iloc[0]["path"]
     size = int(version.tags["image_size"])
     threshold = float(version.tags["threshold"])

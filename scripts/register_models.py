@@ -39,8 +39,22 @@ def main():
         if existing:
             version = max(existing, key=lambda item: int(item.version))
         else:
+            run = client.get_run(result["run_id"])
+            native = [
+                client.get_logged_model(item.model_id)
+                for item in (run.outputs.model_outputs if run.outputs else [])
+            ]
+            native = [
+                item
+                for item in native
+                if item.name == "model" and item.source_run_id == result["run_id"]
+            ]
+            if len(native) != 1:
+                raise RuntimeError("Expected one native model attached to the selected source run")
+            # Use the explicit MLflow 3 ID: DagsHub's experiment-name search can
+            # fail to resolve the legacy runs:/<run>/model convenience URI.
             version = mlflow.register_model(
-                f"runs:/{result['run_id']}/model",
+                f"models:/{native[0].model_id}",
                 name,
                 tags={
                     "candidate": result["spec"]["name"],

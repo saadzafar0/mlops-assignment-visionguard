@@ -94,6 +94,12 @@ of `23l-0829_A2_Ops`, reusing an existing version when the same source run is al
 registered. It assigns the winning version the alias `champion`. Version tags
 record threshold, input size, source model hash, commit, and DVC data version.
 
+During execution, the legacy `runs:/<run>/model` convenience URI could not find
+the model through DagsHub's experiment-scoped search, although the completed run
+contained its native model ID. The registry script reads that ID directly from
+the run outputs and registers `models:/<model_id>`, preserving the actual source
+lineage without retraining.
+
 The independent `python scripts/predict_by_alias.py` loads
 `models:/23l-0829_A2_Ops@champion`, decodes one validation image with the shared
 preprocessing function, and prints the model version, label, `p(AI)`, threshold,
@@ -107,6 +113,19 @@ operation, not part of the per-request serving path.
 
 Required evidence: registry page showing at least two versions and `champion`,
 then terminal output from the separate alias-loading script.
+
+The registry and alias-loading exercise completed successfully:
+
+| Version | Candidate | Alias |
+| --- | --- | --- |
+| 1 | `transfer-lower-dropout` | — |
+| 2 | `transfer-tuned` | `champion` |
+
+The separate loader fetched version 2 through the alias and classified one
+validation image as AI with `p(AI)=0.757910`, using the locked threshold 0.722471.
+The probability matches the saved local validation prediction to within 1e-6.
+Evidence is saved in `reports/generated/registry/versions.json` and
+`alias_prediction.json`; registry and terminal screenshots remain required.
 
 References:
 [MLflow registry and aliases](https://mlflow.org/docs/latest/model-registry/),

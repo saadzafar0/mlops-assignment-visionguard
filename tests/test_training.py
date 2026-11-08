@@ -72,3 +72,21 @@ def test_final_selection_ignores_test_performance():
         "test": {"accuracy": 0.99},
     }
     assert select_by_validation([test_winner, validation_winner]) is validation_winner
+
+
+def test_completed_evaluation_never_reads_or_predicts_test_images(tmp_path, monkeypatch):
+    from visionguard import evaluate
+
+    output = tmp_path / "reports/generated/evaluation"
+    output.mkdir(parents=True)
+    (output / "evaluation.json").write_text("{}")
+    monkeypatch.setattr(evaluate, "PROJECT_ROOT", tmp_path)
+    monkeypatch.setattr(evaluate, "configure_runtime", lambda: None)
+    monkeypatch.setattr(evaluate, "configure_tracking", lambda *args: None)
+
+    def unexpected(*args, **kwargs):
+        raise AssertionError("Completed evaluation must not access test data or infer again")
+
+    for name in ("read_split", "make_dataset", "predict_probabilities"):
+        monkeypatch.setattr(evaluate, name, unexpected)
+    evaluate.main()
