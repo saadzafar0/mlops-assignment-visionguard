@@ -36,6 +36,10 @@ remain part of the next model-development phase.
 The separate [MLflow training lab](../labs/README.md) has since completed both
 local Keras runs with learning rates 0.001 and 0.01. See its measured comparison
 table and `labs/mlflow_toy.py`; UI screenshots remain required.
+The 0.01 run was also repeated successfully on DagsHub, logging all six epochs,
+the training plot, split indices, source script, and a native TensorFlow model.
+[Open the remote trained run](https://dagshub.com/saadzafar0/mlops-assignment-visionguard.mlflow/#/experiments/0/runs/2f366ee2f8c148b89b249bdb3da7b338).
+Its final validation accuracy was 95.00%, matching the local run.
 
 ## Terms for the report
 

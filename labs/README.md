@@ -76,3 +76,8 @@ python labs/mlflow_toy.py --target dagshub --learning-rates 0.01
 
 Remote results are saved separately under `reports/generated/mlflow_toy/dagshub/`.
 Toy metrics must not be included in the VisionGuard model-comparison table.
+
+The remote repetition completed successfully with final validation loss 0.150037
+and accuracy 95.00%, matching the local run at the same learning rate.
+[DagsHub run `2f366ee2f8c148b89b249bdb3da7b338`](https://dagshub.com/saadzafar0/mlops-assignment-visionguard.mlflow/#/experiments/0/runs/2f366ee2f8c148b89b249bdb3da7b338)
+contains the epoch metrics, plot, split indices, source snapshot, and native model.

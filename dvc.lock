@@ -1,0 +1,115 @@
+schema: '2.0'
+stages:
+  audit:
+    cmd: python -m visionguard.audit --root data/raw
+    deps:
+    - path: data/raw
+      hash: md5
+      md5: b2cec67839f742df4653f66d4bcbbafb.dir
+      size: 503783378
+      nfiles: 975
+    - path: src/visionguard/audit.py
+      hash: md5
+      md5: 6224b41c59bcc140d1e353d097b1fb76
+      size: 5572
+      isexec: true
+    - path: src/visionguard/config.py
+      hash: md5
+      md5: d35bc3c63ff4ca870877c2559c5a3676
+      size: 683
+      isexec: true
+    params:
+      params.yaml:
+        data.class_aliases:
+          real:
+          - real
+          - real images
+          - real_images
+          - realimages
+          - human
+          - human images
+          - RealArt
+          ai:
+          - ai
+          - ai images
+          - ai_images
+          - ai-generated
+          - ai_generated
+          - ai generated
+          - fake
+          - fake images
+          - fake_images
+          - artificial
+          - AiArtData
+    outs:
+    - path: reports/generated/audit
+      hash: md5
+      md5: c4c537df92ac78d11b6332ee3172fb8e.dir
+      size: 161235
+      nfiles: 6
+  eda:
+    cmd: python -m visionguard.eda --root data/raw
+    deps:
+    - path: data/raw
+      hash: md5
+      md5: b2cec67839f742df4653f66d4bcbbafb.dir
+      size: 503783378
+      nfiles: 975
+    - path: reports/generated/audit/audit.csv
+      hash: md5
+      md5: 8c0522f96f47e09f3b6b44c52f9e08f0
+      size: 159413
+      isexec: true
+    - path: src/visionguard/config.py
+      hash: md5
+      md5: d35bc3c63ff4ca870877c2559c5a3676
+      size: 683
+      isexec: true
+    - path: src/visionguard/eda.py
+      hash: md5
+      md5: 9fd41e4d5433329c53b93b8fb562a8cb
+      size: 4487
+      isexec: true
+    params:
+      params.yaml:
+        data.seed: 42
+    outs:
+    - path: reports/generated/eda
+      hash: md5
+      md5: da194d77ea5bbeff67fe4487fc76edda.dir
+      size: 2527417
+      nfiles: 5
+  split:
+    cmd: python -m visionguard.split
+    deps:
+    - path: reports/generated/audit/audit.csv
+      hash: md5
+      md5: 8c0522f96f47e09f3b6b44c52f9e08f0
+      size: 159413
+      isexec: true
+    - path: src/visionguard/audit.py
+      hash: md5
+      md5: 6224b41c59bcc140d1e353d097b1fb76
+      size: 5572
+      isexec: true
+    - path: src/visionguard/config.py
+      hash: md5
+      md5: d35bc3c63ff4ca870877c2559c5a3676
+      size: 683
+      isexec: true
+    - path: src/visionguard/split.py
+      hash: md5
+      md5: b0663610c490d58627f05ca0d3ace8af
+      size: 3345
+      isexec: true
+    params:
+      params.yaml:
+        data.seed: 42
+        data.test_fraction: 0.15
+        data.validation_fraction: 0.15
+    outs:
+    - path: data/processed/splits
+      hash: md5
+      md5: 539c4745f99e974ade24a9c719d3361a.dir
+      size: 125094
+      nfiles: 4
