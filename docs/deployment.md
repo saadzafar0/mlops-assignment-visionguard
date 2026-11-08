@@ -107,6 +107,31 @@ No cloud database or paid service is declared in the Blueprint. Actual cloud
 deployment and its public URL remain pending until the account is connected.
 The repository's build configuration alone is not evidence of a live deployment.
 
+## Troubleshooting: missing Render API key
+
+The first attempted cloud deployment built successfully, fetched the verified
+champion, loaded the SavedModel, and bound Gunicorn to Render's port 10000.
+The worker then exited with code 3 and this application error:
+
+```text
+ValueError: Set INFERENCE_API_KEY before starting the public inference API
+```
+
+This means the service's runtime environment had no nonempty `INFERENCE_API_KEY`.
+The local ignored `.env` is deliberately excluded from the image, and creating a
+manual Web Service does not automatically apply the Blueprint's environment
+settings. TensorFlow's CPU-feature messages and absent warmup-file notice were
+informational; the model had already loaded successfully.
+
+Open **Render Dashboard → this service → Environment**, add `INFERENCE_API_KEY`
+with the same value as the local ignored `.env`, keep `API_REQUIRE_KEY=true`,
+then save and redeploy. No model changes or retraining are needed. Do not disable
+API authentication to bypass this configuration error.
+
+The startup script now checks this setting first and exits with a short actionable
+message (code 64) before launching TensorFlow Serving if it is missing. The
+application factory independently retains its missing-key check.
+
 ## Connect local Flask to the deployed API
 
 Change these values in the local ignored `.env` and restart Gunicorn:

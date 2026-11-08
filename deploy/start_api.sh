@@ -1,6 +1,16 @@
 #!/bin/bash
 set -eu
 
+# Catch missing dashboard configuration before loading the model.
+api_require_key="${API_REQUIRE_KEY-true}"
+if [[ "${api_require_key,,}" == "true" && -z "${INFERENCE_API_KEY-}" ]]; then
+  printf '%s\n' \
+    'Configuration error: INFERENCE_API_KEY is missing.' \
+    'In Render, open this service -> Environment and add INFERENCE_API_KEY.' \
+    'Use the same value as the local ignored .env, then save and redeploy.' >&2
+  exit 64
+fi
+
 tensorflow_model_server \
   --model_name=visionguard \
   --model_base_path=/app/models/serving \

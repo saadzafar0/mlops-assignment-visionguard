@@ -9,6 +9,7 @@ services:
       - key: PROJECT_NAME
         value: 23l-0829_A2_Ops
       - key: INFERENCE_API_KEY
+        # Required: enter the same nonempty secret as the local ignored .env.
         sync: false
       - key: API_REQUIRE_KEY
         value: "true"
