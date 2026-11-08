@@ -15,3 +15,7 @@ services:
         value: "true"
       - key: INFERENCE_BACKEND
         value: tensorflow-serving
+      - key: MODEL_MANIFEST
+        value: /app/models/serving/manifest.json
+      - key: TFSERVING_URL
+        value: http://127.0.0.1:8501/v1/models/visionguard:predict

@@ -11,6 +11,13 @@ if [[ "${api_require_key,,}" == "true" && -z "${INFERENCE_API_KEY-}" ]]; then
   exit 64
 fi
 
+# This launcher always starts the bundled C++ server. Local Flask settings from
+# a copied .env must not select Python Keras or a different model path here.
+export INFERENCE_BACKEND=tensorflow-serving
+export MODEL_MANIFEST=/app/models/serving/manifest.json
+export TFSERVING_URL=http://127.0.0.1:8501/v1/models/visionguard:predict
+printf '%s\n' 'Cloud inference uses TensorFlow Serving and the bundled champion manifest.'
+
 tensorflow_model_server \
   --model_name=visionguard \
   --model_base_path=/app/models/serving \

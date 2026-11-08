@@ -108,15 +108,20 @@ creation. Alternatively, use these dashboard steps:
    in the local ignored `.env`. Do not paste it into Git, chat, or screenshots.
    The Blueprint prompts for this value via `sync: false`.
 5. Set `PROJECT_NAME=23l-0829_A2_Ops`, `API_REQUIRE_KEY=true`, and
-   `INFERENCE_BACKEND=tensorflow-serving`; the Blueprint includes these.
+   `INFERENCE_BACKEND=tensorflow-serving`. Set
+   `MODEL_MANIFEST=/app/models/serving/manifest.json` and
+   `TFSERVING_URL=http://127.0.0.1:8501/v1/models/visionguard:predict`.
+   The Blueprint includes these cloud values. `.env.example` configures local
+   Flask; use `render.yaml` for the cloud service's settings.
 6. Use health-check path `/health`. Keep the Docker startup command from the
    image; it honors Render's `PORT` environment variable.
 7. Deploy. Check build logs for verified champion version 2, then service logs
    for model readiness and Gunicorn startup. Save the actual `https://…onrender.com`
    URL once `/health` returns HTTP 200 with `model_loaded: true`.
 
-No cloud database or paid service is declared in the Blueprint. Actual cloud
-deployment and its public URL remain pending until the account is connected.
+No cloud database or paid service is declared in the Blueprint. Successful cloud
+verification and the public API URL remain pending; the service has been created
+manually and its startup issues are documented below.
 The repository's build configuration alone is not evidence of a live deployment.
 
 ## Troubleshooting: missing Render API key
@@ -143,6 +148,44 @@ API authentication to bypass this configuration error.
 The startup script now checks this setting first and exits with a short actionable
 message (code 64) before launching TensorFlow Serving if it is missing. The
 application factory independently retains its missing-key check.
+
+## Troubleshooting: local backend selected in the cloud
+
+A later deploy passed the API-key check and loaded the C++ model server, but its
+Flask worker called `KerasPredictor` and failed with:
+
+```text
+ModuleNotFoundError: No module named 'tensorflow'
+```
+
+The factory takes that path when `INFERENCE_BACKEND=local`. That is the correct
+setting for native Flask but selects an unavailable Python TensorFlow runtime in
+the cloud image. The image intentionally uses the bundled C++ server to fit the
+free instance; installing Python TensorFlow into it would undo that design.
+
+Use these values in Render's Environment settings:
+
+| Setting | Cloud value |
+| --- | --- |
+| `INFERENCE_BACKEND` | `tensorflow-serving` |
+| `MODEL_MANIFEST` | `/app/models/serving/manifest.json` |
+| `TFSERVING_URL` | `http://127.0.0.1:8501/v1/models/visionguard:predict` |
+| `INFERENCE_API_KEY` | The same secret as local Flask |
+| `API_REQUIRE_KEY` | `true` |
+
+The dedicated cloud launcher now sets its backend, manifest, and loopback URL
+explicitly before starting Gunicorn, so copied local settings cannot redirect it
+to Keras, a missing local manifest, or another model server. It keeps Render's
+`PORT` and the configured API key. The local Flask launcher still honors its own
+`INFERENCE_BACKEND` setting normally.
+
+The container smoke check reproduces the failure by supplying a local backend,
+local manifest path, and incorrect model-server URL, then requires authenticated
+inference to succeed using the bundled model at the same 512 MiB memory limit.
+The rebuilt image passed that check: health and both predictions returned 200,
+missing authentication returned 401, and corrupt-image rejection returned 422,
+with no out-of-memory termination. The measured regression evidence is saved in
+`reports/generated/serving/backend_override_smoke.json`.
 
 ## Connect local Flask to the deployed API
 

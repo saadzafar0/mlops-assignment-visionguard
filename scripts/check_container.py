@@ -101,6 +101,13 @@ def main():
                 "1",
                 "--env",
                 "INFERENCE_API_KEY",
+                # Reproduce local .env settings accidentally copied to Render.
+                "--env",
+                "INFERENCE_BACKEND=local",
+                "--env",
+                "MODEL_MANIFEST=models/champion/manifest.json",
+                "--env",
+                "TFSERVING_URL=http://127.0.0.1:1/wrong-local-url",
                 args.image,
             ],
             env=environment,
@@ -122,7 +129,12 @@ def main():
             subprocess.check_output(["docker", "inspect", "--format", "{{json .State}}", name])
         )
         assert state["Running"] and not state["OOMKilled"]
-        report.update(memory_limit_bytes=512 * 1024**2, missing_key_exit=64, oom_killed=False)
+        report.update(
+            memory_limit_bytes=512 * 1024**2,
+            missing_key_exit=64,
+            oom_killed=False,
+            copied_local_settings_overridden=True,
+        )
         print(json.dumps(report, indent=2))
     except Exception:
         subprocess.run(["docker", "logs", "--tail", "50", name], check=False)
