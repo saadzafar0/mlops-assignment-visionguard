@@ -53,6 +53,13 @@ and HTTP 401 for an unauthenticated prediction. It does not need the inference
 key or deployment credentials and is kept separate from the build CI so an idle
 or unavailable demo service does not block source-code checks.
 
+The [independent-network run](https://github.com/saadzafar0/mlops-assignment-visionguard/actions/runs/42493436435)
+completed successfully: the GitHub-hosted runner received healthy model-version-2
+metadata and HTTP 401 for a prediction without a key. This verifies public
+reachability from a network separate from localhost. Actual job metadata and
+logs are in `reports/generated/serving/public_network_run.json` and
+`public_network_log.txt`. This check uses no stored inference secret.
+
 For the required **Postman** evidence, import
 `deploy/visionguard.postman_collection.json`; the actual base URL is already set.
 Store the matching key privately, select validation JPEG/PNG files, and capture

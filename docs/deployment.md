@@ -230,8 +230,10 @@ Do not capture the Authorization value when taking screenshots.
 
 For Tasks 7–8, record the real public health response, authenticated prediction
 responses in Postman, multiple uploads from localhost Flask with backend
-`remote`, and their persisted history rows. Test the live API from another
-network (for example a phone on mobile data). The API URL is already in the README;
+`remote`, and their persisted history rows. The public health/API-key check
+has also passed from a separate GitHub-hosted network; its
+[run page](https://github.com/saadzafar0/mlops-assignment-visionguard/actions/runs/42493436435)
+provides network-reachability evidence. The API URL is already in the README;
 include it in the final PDF too. Authenticated cloud inference and local-Flask
 integration have passed. The Postman demonstration and report screenshots still
 need to be captured. The separate manual `deployed-api.yml` workflow checks public
