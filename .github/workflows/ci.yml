@@ -1,0 +1,132 @@
+name: VisionGuard CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: visionguard-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Lint and test Python 3.12
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      TF_CPP_MIN_LOG_LEVEL: "2"
+      PYTHONHASHSEED: "42"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: "0.12.17"
+          enable-cache: true
+      - name: Install the locked environment
+        run: uv sync --locked --python 3.12
+      - name: Lint and formatting
+        run: |
+          uv run --no-sync ruff check .
+          uv run --no-sync ruff format --check .
+      - name: Data, training-policy, and serving tests
+        run: uv run --no-sync pytest -q
+
+  containers:
+    name: Docker API and PostgreSQL Compose
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Docker warm-up with port mapping, volume, logs, shell, and cleanup
+        run: bash labs/docker_toy.sh
+      - name: Build the inference image
+        run: docker build --target inference --tag visionguard-inference:ci .
+      - name: Test inference within 512 MiB, authentication, and startup preflight
+        run: python3 scripts/check_container.py
+      - name: Create temporary Compose credentials
+        run: |
+          python3 - <<'PY'
+          import secrets
+          from pathlib import Path
+          Path('.env').write_text('POSTGRES_PASSWORD=' + secrets.token_hex(32) + '\nWEB_PORT=18000\n')
+          Path('.env').chmod(0o600)
+          PY
+      - name: Start web and database with readiness checks
+        run: docker compose --project-name visionguard-ci up --build --detach --wait --wait-timeout 180
+      - name: Verify internal database connection and persistent HTTP prediction
+        run: |
+          docker compose --project-name visionguard-ci exec -T web python - <<'PY'
+          import io
+          import requests
+          from PIL import Image
+          from sqlalchemy.engine import make_url
+          from visionguard.database import Database
+          from visionguard.serving_config import settings
+          config = settings()
+          assert make_url(config['DATABASE_URL']).host == 'db'
+          assert Database(config['DATABASE_URL']).healthy()
+          stream = io.BytesIO()
+          Image.new('RGB', (24, 16), (40, 70, 130)).save(stream, format='PNG')
+          response = requests.post('http://127.0.0.1:8000/api/predict', files={
+              'image': ('ci-roundtrip.png', stream.getvalue()),
+          }, timeout=60)
+          assert response.status_code == 201, response.text
+          assert response.json()['model_version'] == '2'
+          print('Prediction persisted through db service:', response.json())
+          PY
+          python3 - <<'PY'
+          import json
+          import subprocess
+          db = subprocess.check_output(['docker', 'compose', '--project-name', 'visionguard-ci', 'ps', '--quiet', 'db']).decode().strip()
+          ports = json.loads(subprocess.check_output(['docker', 'inspect', '--format', '{{json .NetworkSettings.Ports}}', db]))
+          assert all(value is None for value in ports.values()), ports
+          mounts = json.loads(subprocess.check_output(['docker', 'inspect', '--format', '{{json .Mounts}}', db]))
+          assert any(item['Type'] == 'volume' and item['Destination'] == '/var/lib/postgresql/data' for item in mounts)
+          print('PostgreSQL has a named volume and no published host ports.')
+          PY
+      - name: Diagnose a deliberate wrong-password failure
+        run: |
+          if docker compose --project-name visionguard-ci run --rm --no-deps \
+            --env DATABASE_URL=postgresql+psycopg://visionguard:deliberately-wrong@db:5432/visionguard \
+            web python -c 'import os; from visionguard.database import Database; Database(os.environ["DATABASE_URL"])' \
+            > /tmp/visionguard-wrong-db.log 2>&1; then
+            echo 'The deliberately wrong password unexpectedly succeeded.'
+            exit 1
+          fi
+          rg 'password authentication failed' /tmp/visionguard-wrong-db.log
+          docker compose --project-name visionguard-ci exec -T web python -c \
+            'from visionguard.database import Database; from visionguard.serving_config import settings; assert Database(settings()["DATABASE_URL"]).healthy(); print("Correct environment restores database connectivity.")'
+      - name: Restart services and verify stored history remains
+        run: |
+          docker compose --project-name visionguard-ci restart db
+          docker compose --project-name visionguard-ci up --detach --wait --wait-timeout 120
+          docker compose --project-name visionguard-ci restart web
+          docker compose --project-name visionguard-ci up --detach --wait --wait-timeout 120
+          docker compose --project-name visionguard-ci exec -T web python - <<'PY'
+          import requests
+          response = requests.get('http://127.0.0.1:8000/history', timeout=10)
+          assert response.status_code == 200
+          assert 'ci-roundtrip.png' in response.text
+          print('History remained after restarting both services.')
+          PY
+      - name: Service status and logs
+        if: always()
+        run: |
+          docker compose --project-name visionguard-ci ps
+          docker compose --project-name visionguard-ci logs --tail 30
+      - name: Remove only the temporary CI stack and its data
+        if: always()
+        run: |
+          if [ -f .env ]; then
+            docker compose --project-name visionguard-ci down --volumes --remove-orphans
+            rm .env
+          fi

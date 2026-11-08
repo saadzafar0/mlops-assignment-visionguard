@@ -1,5 +1,7 @@
 # VisionGuard — 23l-0829_A2_Ops
 
+[![VisionGuard CI](https://github.com/saadzafar0/mlops-assignment-visionguard/actions/workflows/ci.yml/badge.svg)](https://github.com/saadzafar0/mlops-assignment-visionguard/actions/workflows/ci.yml)
+
 AI-generated versus real image classification for MLOps Assignment 2.
 
 - Student: Saad Zafar, **23l-0829**
@@ -22,7 +24,9 @@ threshold. [Task 3](docs/task3.md) records the two registry versions and verifie
 `champion` alias. The Flask upload/result/history pages and durable database are
 implemented and tested. See [Tasks 4–5](docs/task4_5.md) and
 [inference hosting](docs/deployment.md) for local use and the free Render deployment.
-Cloud deployment, Compose runtime evidence, CI, and report screenshots remain pending.
+Cloud deployment and report screenshots remain pending. The
+[CI workflow](.github/workflows/ci.yml) checks linting, tests, the API Docker image,
+and the web/PostgreSQL Compose stack; see [Task 6 notes](docs/task6.md).
 
 ## Environment
 
