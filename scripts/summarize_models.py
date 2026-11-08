@@ -65,6 +65,10 @@ def main():
     trials = pd.read_csv(folder / "transfer-tuned/tuner_trials.csv")
     effects = json.loads((folder / "transfer-tuned/hyperparameter_effects.json").read_text())
     largest = max(effects, key=lambda key: effects[key]["mean_loss_range"])
+    by_name = {item["candidate"]: item for item in rows}
+    winner = by_name[selection["champion"]]
+    lowest_cost = min(rows, key=lambda item: item["cost_3FP_FN"])
+    best_trial = trials.loc[trials["validation_loss"].idxmin()]
     text = [
         "# Task 2 — Measured model results",
         "",
@@ -72,11 +76,21 @@ def main():
         "",
         "## Validation comparison",
         "",
-        comparison.to_markdown(index=False, floatfmt=".4f"),
+        comparison.drop(columns=["run_id"]).to_markdown(index=False, floatfmt=".4f"),
         "",
         "Six controlled runs plus one eight-trial tuned candidate were completed. The CNN "
         "variants use manual logging; transfer variants use autologging. Tuner trials use "
         "manual logging in nested runs. Models and thresholds were selected on validation data.",
+        "",
+        "Disabling CNN augmentation produced validation AUC "
+        f"{by_name['baseline-no-augmentation']['validation_auc']:.4f}, compared with "
+        f"{by_name['baseline-reference']['validation_auc']:.4f} for its reference and "
+        f"{by_name['baseline-lower-lr']['validation_auc']:.4f} for the lower learning rate. "
+        f"The declared ranking selected **{winner['candidate']}** with validation AUC "
+        f"{winner['validation_auc']:.4f}. Its validation error cost was "
+        f"{winner['cost_3FP_FN']}, versus the lowest observed cost "
+        f"{lowest_cost['cost_3FP_FN']} from {lowest_cost['candidate']}. "
+        "This tradeoff was resolved before test evaluation, with ranking quality taking priority.",
         "",
         "## Best epochs",
         "",
@@ -95,9 +109,21 @@ def main():
         "the search is small and the other settings are not balanced. Choosing the best trial "
         "can overfit validation noise, so test data stayed untouched until final selection.",
         "",
+        f"The best trial used learning rate {best_trial['learning_rate']:g}, dropout "
+        f"{best_trial['dropout']:g}, and {int(best_trial['unfrozen_layers'])} unfrozen "
+        f"convolution(s), reaching validation loss {best_trial['validation_loss']:.4f}. "
+        "Dropout and limited backbone updates control the amount of adaptation on this "
+        "small training set. The mixed search does not isolate a causal effect for either choice.",
+        "",
         "## Locked test evaluation",
         "",
-        test.to_markdown(index=False, floatfmt=".4f"),
+        test[
+            ["model", "threshold", "accuracy", "precision", "recall", "f1", "roc_auc"]
+        ].to_markdown(index=False, floatfmt=".4f"),
+        "",
+        test[
+            ["model", "true_negative", "false_positive", "false_negative", "true_positive"]
+        ].to_markdown(index=False),
         "",
         f"The validation-selected serving champion is **{selection['champion']}**. "
         "The test comparison did not change this choice or the validation-chosen thresholds. "

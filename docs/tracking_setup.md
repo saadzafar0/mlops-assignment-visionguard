@@ -30,8 +30,8 @@ parameter, a numeric metric, a Git-revision tag, and `check.txt` as an artifact.
 
 These checks establish parameter/metric/artifact connectivity. They do **not**
 meet Task 3.1's two trained Keras runs, Task 3.3's manual/autologging comparison,
-Task 3.5's six VisionGuard experiments, or Task 3.6's registry exercise. Those
-remain part of the next model-development phase.
+Task 3.5's six VisionGuard experiments, or Task 3.6's registry exercise. Those are
+documented separately in [Task 3](task3.md) and [measured model results](task2_results.md).
 
 The separate [MLflow training lab](../labs/README.md) has since completed both
 local Keras runs with learning rates 0.001 and 0.01. See its measured comparison

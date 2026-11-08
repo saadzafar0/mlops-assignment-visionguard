@@ -35,14 +35,23 @@ each epoch. Each augmented candidate logs a sample batch figure.
 The custom model uses three blocks of 3×3 convolution, batch normalisation, ReLU,
 and max pooling, with 16, 32, and 64 filters. Convolutions learn local patterns;
 normalisation stabilises activations; ReLU introduces nonlinear behaviour; pooling
-reduces the spatial workload. Global average pooling limits parameter count,
-followed by a 64-unit dense layer, dropout, and one sigmoid output.
+reduces the spatial workload. Filter counts increase as spatial dimensions shrink.
+Three pooling operations reduce 128×128 inputs to 16×16 feature maps. Global
+average pooling reduces the 16×16×64 tensor to 64 values, limiting parameter count.
+A 64-unit dense layer learns nonlinear combinations of those pooled features;
+dropout regularises the small training set before the single sigmoid output.
 
 An internal rescaling layer maps raw 0–255 RGB pixels to 0–1. The sigmoid output
 is `p(AI)` because the fixed label map is real=0 and AI=1. Binary cross-entropy is
 appropriate for this binary target. Adam provides adaptive gradient updates.
 Accuracy, precision, recall, and ROC-AUC are logged; exact final AUC is computed
 from probabilities using scikit-learn rather than thresholded predictions.
+
+| Model/stage | Total parameters | Trainable parameters |
+| --- | ---: | ---: |
+| Custom CNN | 28,145 | 27,921 |
+| MobileNetV2 frozen head | 707,505 | 1,281 |
+| MobileNetV2 four-convolution fine-tuning | 707,505 | 325,601 |
 
 Expanded model summaries and per-layer shape/parameter tables are saved for every
 training stage and uploaded as MLflow artifacts. Nested-model parent parameter
@@ -126,6 +135,13 @@ from the same trained frozen-head checkpoint, keeps batch normalisation frozen,
 and fine-tunes for up to four epochs. This isolates fine-tuning choices without
 retraining the frozen head for each trial. Validation loss is the objective;
 test predictions are unavailable to the tuner.
+
+The completed best trial used learning rate 1e-4, dropout 0.5, and only `Conv_1`
+unfrozen; its best epoch was 4 with validation loss 0.449338. Learning rate had
+the largest grouped mean-loss range in this search (0.0144), compared with
+0.0069 for dropout and 0.0058 for the unfrozen-layer count. Faster adaptation during
+the short fine-tuning budget is one plausible explanation; the uneven small
+search prevents a causal ranking of these hyperparameters.
 
 Each trial logs its settings and epoch metrics to a nested MLflow run. The trial
 table, best settings, and descriptive mean-loss differences by parameter value

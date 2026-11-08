@@ -67,4 +67,4 @@ Figures: `reports/generated/eda/samples.png`, `width_histogram.png`, `height_his
 - A subsequent `dvc status --cloud -j 4` confirmed: `Cache and remote 'dagshub' are in sync.`
 - The separate MLflow digits lab completed two local runs (84.17% and 95.00% validation accuracy) and repeated the 0.01 learning-rate run on DagsHub (95.00%). These are toy scores, not VisionGuard results.
 - Required terminal/browser screenshots and publication of the toy commits to DagsHub remain outstanding.
-- No VisionGuard model has been trained or evaluated yet.
+- Subsequent model development and test evaluation are recorded in [Task 2 results](task2_results.md).

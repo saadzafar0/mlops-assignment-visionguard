@@ -14,8 +14,12 @@ The dataset and pipeline outputs have been uploaded to DagsHub DVC storage.
 See [measured results](docs/task1_results.md), [Task 1 explanations](docs/task1.md),
 and [DagsHub connection checks](docs/tracking_setup.md). Required screenshots and
 publishing the toy commits remain outstanding. Task 2 training tools and report
-notes are in [model development](docs/task2.md); the web application, database,
-Docker, CI, and deployment follow model selection.
+notes are in [model development](docs/task2.md), with [measured results](docs/task2_results.md)
+and [image-specific error analysis](docs/error_analysis.md). Six controlled runs,
+eight tuning trials, and final test evaluation have completed. The tuned MobileNetV2
+champion achieved **75.51% test accuracy and 0.9126 ROC-AUC** at its validation-selected
+threshold. [Task 3](docs/task3.md) records the two registry versions and verified
+`champion` alias. The web application, database, Docker, CI, and deployment follow.
 
 ## Environment
 
@@ -161,6 +165,17 @@ See [Task 2 notes](docs/task2.md) for preprocessing, model design, error costs,
 logging, and evidence instructions. Model files stay outside Git; DagsHub runs
 contain the trained models and their metadata.
 
+The selected model can be retrieved without downloading the full training data:
+
+```bash
+dvc pull models/champion.dvc
+python scripts/predict_by_alias.py
+```
+
+The second command demonstrates registry lookup and inference on one validation
+image (so it also needs that image locally). Future serving code will load the
+local `models/champion/model.keras` and `manifest.json` once at startup.
+
 ## Checks
 
 ```bash
@@ -172,9 +187,10 @@ pytest -q
 The seven data tests cover corruption, exact duplicates, conflicting labels,
 unknown folders, dot-prefixed image filenames, decoded formats, deterministic
 splits, and absence of shared hashes between splits.
-Five training tests verify grayscale/RGB padding, MobileNet preprocessing and
+Six training tests verify grayscale/RGB padding, MobileNet preprocessing and
 layer freezing, saved-model round trips with augmentation disabled, and the
-validation threshold/error-cost policy, and selection independent of test scores.
+validation threshold/error-cost policy, selection independent of test scores,
+and preventing test inference after evaluation has completed.
 
 ## Submission evidence
 
