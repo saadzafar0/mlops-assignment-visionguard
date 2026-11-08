@@ -11,3 +11,23 @@ data:
   class_aliases:
     real: [real, real images, real_images, realimages, human, human images, RealArt]
     ai: [ai, ai images, ai_images, ai-generated, ai_generated, ai generated, fake, fake images, fake_images, artificial, AiArtData]
+training:
+  image_size: 128
+  batch_size: 32
+  baseline_epochs: 12
+  head_epochs: 8
+  fine_tune_epochs: 6
+  learning_rate: 0.001
+  fine_tune_learning_rate: 0.00001
+  dropout: 0.3
+  mobilenet_alpha: 0.5
+  unfrozen_layers: 4
+  early_stopping_patience: 4
+  lr_patience: 2
+  false_positive_cost: 3
+tuning:
+  max_trials: 8
+  epochs_per_trial: 4
+  learning_rates: [0.00001, 0.00003, 0.0001]
+  dropout_rates: [0.1, 0.3, 0.5]
+  unfrozen_layers: [1, 2, 4]
