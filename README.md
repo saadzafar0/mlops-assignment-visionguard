@@ -24,9 +24,11 @@ threshold. [Task 3](docs/task3.md) records the two registry versions and verifie
 `champion` alias. The Flask upload/result/history pages and durable database are
 implemented and tested. See [Tasks 4–5](docs/task4_5.md) and
 [inference hosting](docs/deployment.md) for local use and the free Render deployment.
-Cloud deployment and report screenshots remain pending. The
+Cloud verification and report screenshots remain pending. The
 [CI workflow](.github/workflows/ci.yml) checks linting, tests, the API Docker image,
-and the web/PostgreSQL Compose stack; see [Task 6 notes](docs/task6.md).
+and the web/PostgreSQL Compose stack. Its
+[verified green run](https://github.com/saadzafar0/mlops-assignment-visionguard/actions/runs/42491527434)
+passed all checks; see [Task 6 notes](docs/task6.md).
 
 ## Environment
 
@@ -208,8 +210,10 @@ docker compose logs -f web
 ```
 
 The web service listens on localhost only. PostgreSQL publishes no host port.
-Compose syntax is validated; full stack runtime verification is pending because
-this machine currently cannot create Docker bridge network interfaces.
+The complete Compose stack passed on the GitHub-hosted Docker engine, including
+database readiness, internal networking, real predictions, and history after
+restarts. This local host currently cannot create Docker bridge interfaces;
+native Flask with SQLite remains available here.
 
 ## Inference hosting
 

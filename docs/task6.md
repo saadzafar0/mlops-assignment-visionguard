@@ -141,7 +141,22 @@ warm-up readiness race: the first request received `Connection reset by peer`
 while NGINX was starting. Retrying only refused connections missed that condition.
 The lab now uses bounded `curl --retry-all-errors` retries during startup; its
 normal HTTP assertions still fail if the service does not become ready. The
-project's full Docker/Compose run must pass before it is marked complete.
+database-failure log assertion uses standard Python, avoiding an extra runner
+utility dependency.
+
+The complete project pipeline then
+[passed](https://github.com/saadzafar0/mlops-assignment-visionguard/actions/runs/42491527434)
+at commit `c251a37e94348c9f20c8e4706932e549d902c5b6`: all 27 tests, the Docker
+warm-up, the 512 MiB API smoke, web/database readiness, an actual PostgreSQL-backed
+HTTP prediction, internal network/no-public-DB-port checks, deliberate wrong
+credentials and recovery, and retained history after restarting both services.
+The quality job took 35 seconds; the Docker/Compose job took 3 minutes 1 second.
+Actual metadata and logs are versioned in `reports/generated/ci/`. Screenshots of
+the green run and relevant step output remain required for the final report.
+
+CI/documentation-only commits may include `[skip render]` to avoid restarting the
+cloud API while continuing to run GitHub Actions. See
+[Render's skip-deploy documentation](https://render.com/docs/deploys#skipping-an-auto-deploy).
 
 References: [GitHub Actions concurrency](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency),
 [official checkout action](https://github.com/actions/checkout),

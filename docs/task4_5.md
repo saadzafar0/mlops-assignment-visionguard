@@ -120,8 +120,10 @@ Native execution uses the persistent `.cache/history.db` SQLite file. A test
 creates a prediction, disposes the first application, creates a second application
 against the same file, and verifies that history remains. Compose selects
 PostgreSQL instead, with a named volume independent of container lifetime and
-no externally published database port. Full Compose runtime verification remains
-pending on this machine because Docker cannot create bridge interfaces.
+no externally published database port. The full Compose stack passed on the
+GitHub runner, including a real HTTP prediction and retained history after
+restarting both services. This local machine cannot create Docker bridge
+interfaces; its native SQLite application remains usable.
 
 Example query without displaying credentials:
 

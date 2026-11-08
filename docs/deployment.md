@@ -38,6 +38,10 @@ contains neither the training Python environment nor any `.env` file. Only the
 Gunicorn HTTP port is intended for public access; TensorFlow Serving is an
 internal dependency. Its model is loaded before the public API starts.
 
+The SavedModel folder `1` is TensorFlow Serving's internal export number.
+The original model is still MLflow registry **version 2**, identified by the
+checksum-verified champion manifest; the API reports that registry version.
+
 The Dockerfile also has a `web` target for the local Flask/Compose stack, using
 CPU-only Python TensorFlow. Dependencies are installed before copying source to
 reuse the large layer when application code changes. Both targets run as UID
@@ -72,6 +76,14 @@ processes inside the same container. Warm usage after the checks was about
 actual Render startup, cold starts, and public requests still require deployment.
 The local `web` Docker target also built successfully and passed real HTTP
 inference/history checks with the original Keras model.
+
+The [successful hosted CI run](https://github.com/saadzafar0/mlops-assignment-visionguard/actions/runs/42491527434)
+additionally verified actual Docker port mapping and the complete Compose stack
+on GitHub's engine: PostgreSQL readiness, connection through hostname `db`, a
+named database volume, no published database port, a real persisted prediction,
+wrong-password diagnosis/recovery, and retained history after both service
+restarts. This resolves the Compose runtime evidence gap despite the local
+host's bridge-network limitation. It does not replace testing the live Render URL.
 
 The local web image is **2,200,499,661 bytes**; the multi-stage inference image is
 **1,216,319,411 bytes**, a **44.73%** reduction. Both serve the same model, while
