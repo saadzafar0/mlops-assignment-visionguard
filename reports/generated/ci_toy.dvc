@@ -1,0 +1,6 @@
+outs:
+- md5: 8cca5536eb6543bf5b9fb0c9084c1f89.dir
+  size: 10899
+  nfiles: 4
+  hash: md5
+  path: ci_toy

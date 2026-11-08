@@ -121,8 +121,10 @@ jobs:
       - name: Service status and logs
         if: always()
         run: |
-          docker compose --project-name visionguard-ci ps
-          docker compose --project-name visionguard-ci logs --tail 30
+          if [ -f .env ]; then
+            docker compose --project-name visionguard-ci ps
+            docker compose --project-name visionguard-ci logs --tail 30
+          fi
       - name: Remove only the temporary CI stack and its data
         if: always()
         run: |

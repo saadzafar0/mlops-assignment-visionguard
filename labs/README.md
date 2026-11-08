@@ -100,3 +100,29 @@ budget. `reports/generated/tuner_toy/trials.csv` and `best.json` contain the
 results. The VisionGuard search is separate: it warm-starts from the frozen
 MobileNetV2 head and tunes learning rate, dropout, and trainable tail size over
 at least eight completed trials, as described in `docs/task2.md`.
+
+## Docker exercise (Task 6.1)
+
+`bash labs/docker_toy.sh` performs port mapping, named-volume recovery across
+container replacement, logs, shell inspection, listing, and cleanup with a
+ready-made NGINX image. It uses uniquely named temporary resources and removes
+only those resources. A working Docker bridge network is needed; this host lacks
+that capability, so the same lab also runs on the hosted GitHub CI runner.
+See [Task 6 notes](../docs/task6.md) for definitions and evidence requirements.
+
+## GitHub Actions exercise (Task 6.6)
+
+The separate [toy repository](https://github.com/saadzafar0/23l-0829_A2_Ops-ci-toy)
+contains two commits: an intentional `add()` bug, then its fix. Each push ran a
+two-version Python matrix with a standard-library unittest.
+
+| Run | Result | Python versions |
+| --- | --- | --- |
+| [Intentional bug](https://github.com/saadzafar0/23l-0829_A2_Ops-ci-toy/actions/runs/42490780163) | Failure | 3.11 and 3.12 |
+| [Fixed addition](https://github.com/saadzafar0/23l-0829_A2_Ops-ci-toy/actions/runs/42490817253) | Success | 3.11 and 3.12 |
+
+`labs/ci_toy.py` reproduces the creation/publication sequence for a **new** repo
+name and refuses to overwrite existing work. Completed run metadata and the
+intentional failure log are in `reports/generated/ci_toy/`. Capture both run
+pages with the repository URL and matrix jobs visible. These are actual hosted
+results; they are separate from the real VisionGuard pipeline.

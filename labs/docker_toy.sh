@@ -18,7 +18,7 @@ docker volume create "$toy_name"
 docker run --detach --name "$toy_name" \
   --publish "127.0.0.1:$toy_port:80" \
   --mount "type=volume,source=$toy_name,target=/usr/share/nginx/html" "$toy_image"
-curl --fail --silent --show-error --retry 15 --retry-connrefused --retry-delay 1 \
+curl --fail --silent --show-error --retry 15 --retry-all-errors --retry-delay 1 \
   "http://127.0.0.1:$toy_port/" >/dev/null
 docker exec "$toy_name" sh -c \
   'printf "<h1>23l-0829_A2_Ops: named volume retained this page</h1>\n" > /usr/share/nginx/html/index.html'
@@ -35,7 +35,7 @@ docker rm "$toy_name"
 docker run --detach --name "$toy_name" \
   --publish "127.0.0.1:$toy_port:80" \
   --mount "type=volume,source=$toy_name,target=/usr/share/nginx/html" "$toy_image"
-page=$(curl --fail --silent --show-error --retry 15 --retry-connrefused --retry-delay 1 \
+page=$(curl --fail --silent --show-error --retry 15 --retry-all-errors --retry-delay 1 \
   "http://127.0.0.1:$toy_port/")
 [[ "$page" == *'named volume retained this page'* ]]
 printf '%s\n' "$page" 'The replacement container recovered the page from the named volume.'

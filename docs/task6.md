@@ -125,10 +125,23 @@ Actions**, referenced through `secrets`, rather than workflow text. The hosted
 Render API key belongs in Render's Environment settings and the local ignored
 `.env`; it is not required for CI's isolated API.
 
-The separate two-Python-version CI toy exercise with intentionally red and then
-green runs remains outstanding. A project workflow is not a substitute for that
-throwaway-repository lab. Actual hosted workflow results and screenshots must be
-recorded after execution, rather than inferred from the YAML.
+The isolated [CI toy repository](https://github.com/saadzafar0/23l-0829_A2_Ops-ci-toy)
+completed both required runs. An intentionally incorrect subtraction implementation
+failed its addition assertion in the [red run](https://github.com/saadzafar0/23l-0829_A2_Ops-ci-toy/actions/runs/42490780163).
+Changing subtraction to addition passed on **Python 3.11 and 3.12** in the
+[green run](https://github.com/saadzafar0/23l-0829_A2_Ops-ci-toy/actions/runs/42490817253).
+`python labs/ci_toy.py` created and published the two commits and waited for each
+real workflow result before proceeding. It refuses to overwrite an existing lab
+folder or remote repository. Metadata, job results, and the failure log are saved
+in `reports/generated/ci_toy/`. Capture both run pages, including their two matrix
+jobs, for the report.
+
+The initial project workflow passed linting and all 27 tests but caught a Docker
+warm-up readiness race: the first request received `Connection reset by peer`
+while NGINX was starting. Retrying only refused connections missed that condition.
+The lab now uses bounded `curl --retry-all-errors` retries during startup; its
+normal HTTP assertions still fail if the service does not become ready. The
+project's full Docker/Compose run must pass before it is marked complete.
 
 References: [GitHub Actions concurrency](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency),
 [official checkout action](https://github.com/actions/checkout),
