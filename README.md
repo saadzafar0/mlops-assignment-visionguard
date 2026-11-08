@@ -264,13 +264,3 @@ and preventing test inference after evaluation has completed.
 The serving tests cover rejected uploads, memory-only multipart streams,
 persistent history across application restarts, request auditing, API-key
 authentication, remote-response validation, and unavailable-service behavior.
-
-## Submission evidence
-
-The final PDF must be named `23l-0829_VisionGuard.pdf`. Capture real screenshots
-with terminal/browser context and captions as work proceeds. Generated CSVs and
-plots support the report but do not replace required screenshots.
-
-AI assistance disclosure: OpenAI Codex assisted with repository setup, scripts,
-documentation, and validation. Update the final report with the actual scope of
-assistance and your own explanations of the submitted work.
