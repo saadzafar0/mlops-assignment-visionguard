@@ -1,6 +1,12 @@
 # Inference hosting — Render Free
 
-Project: **23l-0829_A2_Ops**. The selected architecture keeps Flask and history on
+Project: **23l-0829_A2_Ops**. The live API is
+<https://mlops-assignment-visionguard.onrender.com>; its public readiness endpoint
+is [/health](https://mlops-assignment-visionguard.onrender.com/health).
+Authenticated predictions and the local Flask integration have been verified.
+Measured results are in [Tasks 7–8](task7_8.md).
+
+The selected architecture keeps Flask and history on
 localhost and hosts only the model API on Render, matching the Task 7 instruction
 to call the cloud model from a local Flask application.
 
@@ -119,9 +125,9 @@ creation. Alternatively, use these dashboard steps:
    for model readiness and Gunicorn startup. Save the actual `https://…onrender.com`
    URL once `/health` returns HTTP 200 with `model_loaded: true`.
 
-No cloud database or paid service is declared in the Blueprint. Successful cloud
-verification and the public API URL remain pending; the service has been created
-manually and its startup issues are documented below.
+No cloud database or paid service is declared in the Blueprint. The service was
+created manually and is now healthy. Its initial startup issues and fixes are
+documented below.
 The repository's build configuration alone is not evidence of a live deployment.
 
 ## Troubleshooting: missing Render API key
@@ -193,7 +199,7 @@ Change these values in the local ignored `.env` and restart Gunicorn:
 
 ```dotenv
 INFERENCE_BACKEND=remote
-INFERENCE_API_URL=https://YOUR-ACTUAL-SERVICE.onrender.com
+INFERENCE_API_URL=https://mlops-assignment-visionguard.onrender.com
 INFERENCE_API_KEY=<the matching secret set in Render>
 INFERENCE_TIMEOUT_SECONDS=120
 ```
@@ -225,5 +231,9 @@ Do not capture the Authorization value when taking screenshots.
 For Tasks 7–8, record the real public health response, authenticated prediction
 responses in Postman, multiple uploads from localhost Flask with backend
 `remote`, and their persisted history rows. Test the live API from another
-network (for example a phone on mobile data). Add the actual API URL to the
-README and final PDF. These cloud/network checks and screenshots remain pending.
+network (for example a phone on mobile data). The API URL is already in the README;
+include it in the final PDF too. Authenticated cloud inference and local-Flask
+integration have passed. The Postman demonstration and report screenshots still
+need to be captured. The separate manual `deployed-api.yml` workflow checks public
+health and API-key enforcement from a GitHub-hosted network without storing or
+receiving the inference key.

@@ -1,0 +1,56 @@
+name: Deployed API reachability
+
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  public-api:
+    name: Check Render from a GitHub-hosted network
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Check live health and unauthenticated prediction protection
+        env:
+          API_BASE_URL: https://mlops-assignment-visionguard.onrender.com
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import time
+          import urllib.error
+          import urllib.request
+          from datetime import UTC, datetime
+          base = os.environ['API_BASE_URL']
+          deadline = time.monotonic() + 240
+          while time.monotonic() < deadline:
+              try:
+                  with urllib.request.urlopen(base + '/health', timeout=45) as response:
+                      health = json.load(response)
+                  if health.get('model_loaded') is True:
+                      break
+              except (OSError, ValueError):
+                  pass
+              time.sleep(10)
+          else:
+              raise RuntimeError('The deployed model did not become healthy.')
+          assert health['model_version'] == '2', health
+          with urllib.request.urlopen(base + '/', timeout=30) as response:
+              metadata = json.load(response)
+          assert metadata['project'] == '23l-0829_A2_Ops', metadata
+          request = urllib.request.Request(base + '/predict', data=b'', method='POST')
+          try:
+              urllib.request.urlopen(request, timeout=30)
+          except urllib.error.HTTPError as error:
+              assert error.code == 401, error.code
+          else:
+              raise AssertionError('Unauthenticated prediction was not rejected.')
+          print(json.dumps({
+              'project': metadata['project'], 'base_url': base,
+              'recorded_at_utc': datetime.now(UTC).isoformat(),
+              'runner_environment': os.environ.get('RUNNER_ENVIRONMENT'),
+              'health_status': 200, 'health': health,
+              'unauthenticated_predict_status': 401,
+          }, indent=2))
+          PY

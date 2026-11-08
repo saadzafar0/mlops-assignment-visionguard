@@ -9,7 +9,8 @@ AI-generated versus real image classification for MLOps Assignment 2.
 - [GitHub](https://github.com/saadzafar0/mlops-assignment-visionguard)
 - [DagsHub](https://dagshub.com/saadzafar0/mlops-assignment-visionguard)
 - [MLflow experiments](https://dagshub.com/saadzafar0/mlops-assignment-visionguard.mlflow)
-- Live API: pending deployment
+- [Live model API](https://mlops-assignment-visionguard.onrender.com)
+- [Live model health](https://mlops-assignment-visionguard.onrender.com/health)
 
 Task 1's data audit, EDA, reproducible splits, and local DVC exercise have been run.
 The dataset and pipeline outputs have been uploaded to DagsHub DVC storage.
@@ -24,7 +25,9 @@ threshold. [Task 3](docs/task3.md) records the two registry versions and verifie
 `champion` alias. The Flask upload/result/history pages and durable database are
 implemented and tested. See [Tasks 4–5](docs/task4_5.md) and
 [inference hosting](docs/deployment.md) for local use and the free Render deployment.
-Cloud verification and report screenshots remain pending. The
+The Render API and localhost Flask integration are verified with real validation
+images and persistent remote-result history; see [Tasks 7–8](docs/task7_8.md).
+Report screenshots and the Postman demonstration remain pending. The
 [CI workflow](.github/workflows/ci.yml) checks linting, tests, the API Docker image,
 and the web/PostgreSQL Compose stack. Its
 [verified green run](https://github.com/saadzafar0/mlops-assignment-visionguard/actions/runs/42491527434)
@@ -229,9 +232,19 @@ docker build --target inference -t visionguard-inference .
 
 [`render.yaml`](render.yaml) declares a free service. Deployment instructions,
 API configuration, cold-start behavior, and evidence requirements are in
-[docs/deployment.md](docs/deployment.md). After obtaining its actual HTTPS URL,
-set `INFERENCE_BACKEND=remote`, `INFERENCE_API_URL`, and the matching
-`INFERENCE_API_KEY` in the local ignored `.env`, then restart Flask.
+[docs/deployment.md](docs/deployment.md). To call the deployed service, set these
+values in the local ignored `.env`, preserve the matching `INFERENCE_API_KEY`,
+and restart Flask:
+
+```dotenv
+INFERENCE_BACKEND=remote
+INFERENCE_API_URL=https://mlops-assignment-visionguard.onrender.com
+```
+
+This workspace is configured in remote mode. Open <http://127.0.0.1:5000> to use
+the upload interface; the Render URL serves the model API. Two real HTTP uploads
+through Flask returned the expected real/AI decisions and survived a worker
+restart in history. Evidence is in `reports/generated/serving/`.
 
 ## Checks
 

@@ -5,7 +5,7 @@
     "description": "Set base_url to the deployed HTTPS service and api_key privately. Never export a populated secret. Select local validation images in the form-data fields."
   },
   "variable": [
-    {"key": "base_url", "value": "https://YOUR-ACTUAL-SERVICE.onrender.com"},
+    {"key": "base_url", "value": "https://mlops-assignment-visionguard.onrender.com"},
     {"key": "api_key", "value": ""}
   ],
   "item": [
