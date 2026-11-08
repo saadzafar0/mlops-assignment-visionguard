@@ -1,0 +1,35 @@
+stages:
+  audit:
+    cmd: python -m visionguard.audit --root data/raw
+    deps:
+      - data/raw
+      - src/visionguard/audit.py
+      - src/visionguard/config.py
+    params:
+      - data.class_aliases
+    outs:
+      - reports/generated/audit
+  eda:
+    cmd: python -m visionguard.eda --root data/raw
+    deps:
+      - data/raw
+      - reports/generated/audit/audit.csv
+      - src/visionguard/eda.py
+      - src/visionguard/config.py
+    params:
+      - data.seed
+    outs:
+      - reports/generated/eda
+  split:
+    cmd: python -m visionguard.split
+    deps:
+      - reports/generated/audit/audit.csv
+      - src/visionguard/split.py
+      - src/visionguard/audit.py
+      - src/visionguard/config.py
+    params:
+      - data.seed
+      - data.validation_fraction
+      - data.test_fraction
+    outs:
+      - data/processed/splits

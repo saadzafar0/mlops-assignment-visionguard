@@ -5,8 +5,7 @@ import json
 import platform
 import subprocess
 import sys
-from datetime import datetime, timezone
-from pathlib import Path
+from datetime import UTC, datetime
 
 from visionguard.config import PROJECT_ROOT
 
@@ -27,7 +26,7 @@ def main() -> None:
     )
     evidence = {
         "project": "23l-0829_A2_Ops",
-        "recorded_at_utc": datetime.now(timezone.utc).isoformat(),
+        "recorded_at_utc": datetime.now(UTC).isoformat(),
         "python": sys.version,
         "executable": sys.executable,
         "platform": platform.platform(),
