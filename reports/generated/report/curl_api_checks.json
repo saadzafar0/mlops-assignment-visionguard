@@ -1,0 +1,96 @@
+{
+  "project": "23l-0829_A2_Ops",
+  "username": "saad",
+  "recorded_at_utc": "2026-11-08T15:27:15.833606+00:00",
+  "client": "curl 8.23.0 (x86_64-pc-linux-gnu) libcurl/8.23.0 OpenSSL/3.6.5 zlib/1.3.2 brotli/1.2.1 zstd/1.5.7 libidn2/2.3.8 libpsl/0.21.5 libssh2/1.11.1 nghttp2/1.71.0 ngtcp2/1.26.0 nghttp3/1.19.0 mit-krb5/1.22.2",
+  "authentication": "Bearer key provided privately on curl stdin; not recorded",
+  "records": [
+    {
+      "name": "Model readiness",
+      "command": "curl https://mlops-assignment-visionguard.onrender.com/health",
+      "status": 200,
+      "response": {
+        "model": "transfer-tuned",
+        "model_loaded": true,
+        "model_version": "2",
+        "status": "ok"
+      }
+    },
+    {
+      "name": "Missing key",
+      "command": "curl -X POST https://mlops-assignment-visionguard.onrender.com/predict",
+      "status": 401,
+      "response": {
+        "error": "A valid API key is required.",
+        "request_id": "805a6782-b624-4065-86ab-064c5a123940"
+      }
+    },
+    {
+      "name": "Real validation image",
+      "command": "curl --config - -F image=@<validation-image> https://mlops-assignment-visionguard.onrender.com/predict",
+      "filename": "10-tips-for-stunning-portrait-photography-7.jpg",
+      "status": 200,
+      "response": {
+        "caveat": "Experimental detector. Scores are model estimates, not proof of an image's origin. Real photographs and human-made artwork can be misclassified.",
+        "confidence": 0.695689052,
+        "image_size": 128,
+        "label": "real",
+        "latency_ms": 19.35,
+        "model_name": "transfer-tuned",
+        "model_sha256": "a9fd72cfee813fc4dfa5ba49441f5c725a076d24097e9a429999082161f84289",
+        "model_version": "2",
+        "probability_ai": 0.304310948,
+        "request_id": "cc3b5d15-f353-4ad6-a6a1-631bd2441e80",
+        "threshold": 0.7224706411361694
+      },
+      "agreement_absolute_error": 2.2919999999593266e-06
+    },
+    {
+      "name": "AI validation image",
+      "command": "curl --config - -F image=@<validation-image> https://mlops-assignment-visionguard.onrender.com/predict",
+      "filename": "-yellow-kimono-with-a-golden-crown-and-a-very-detailed-Barn-owl-copy-800x800.jpg",
+      "status": 200,
+      "response": {
+        "caveat": "Experimental detector. Scores are model estimates, not proof of an image's origin. Real photographs and human-made artwork can be misclassified.",
+        "confidence": 0.757909358,
+        "image_size": 128,
+        "label": "ai",
+        "latency_ms": 11.85,
+        "model_name": "transfer-tuned",
+        "model_sha256": "a9fd72cfee813fc4dfa5ba49441f5c725a076d24097e9a429999082161f84289",
+        "model_version": "2",
+        "probability_ai": 0.757909358,
+        "request_id": "5de741c7-9367-4237-b23f-471f35fb2670",
+        "threshold": 0.7224706411361694
+      },
+      "agreement_absolute_error": 1.819999999597144e-07
+    },
+    {
+      "name": "wrong.txt",
+      "command": "curl --config - -F image=@wrong.txt https://mlops-assignment-visionguard.onrender.com/predict",
+      "status": 415,
+      "response": {
+        "error": "Only JPEG (.jpg, .jpeg) and PNG (.png) files are supported.",
+        "request_id": "11253d91-7095-487e-b3b3-3a5791bc4386"
+      }
+    },
+    {
+      "name": "broken.jpg",
+      "command": "curl --config - -F image=@broken.jpg https://mlops-assignment-visionguard.onrender.com/predict",
+      "status": 422,
+      "response": {
+        "error": "This file could not be decoded as a valid image.",
+        "request_id": "7d49bcc6-ad30-4c23-b9e7-e043514dc486"
+      }
+    },
+    {
+      "name": "oversized.png",
+      "command": "curl --config - -F image=@oversized.png https://mlops-assignment-visionguard.onrender.com/predict",
+      "status": 413,
+      "response": {
+        "error": "The image must be no larger than 5 MB.",
+        "request_id": "5e8ad7d8-d1e1-4374-96d3-499285a5d51c"
+      }
+    }
+  ]
+}
