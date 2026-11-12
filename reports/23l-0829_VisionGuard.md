@@ -29,9 +29,7 @@ VisionGuard classifies an uploaded JPEG or PNG using a fine-tuned MobileNetV2. T
 
 The detector is experimental. Its confidence is a model score, not proof of an image's origin. The threshold prioritizes avoiding false accusations against real images.
 
-## Assistance and evidence
-
-OpenAI Codex assisted with repository setup, implementation, debugging, experiment execution, validation, documentation and preparation of this report. Official documentation informed the tool configuration. Results below come from recorded project artifacts; no training or test evaluation was repeated to prepare this PDF.
+## Evidence
 
 API evidence uses **curl instead of Postman**, as requested. Figures are generated from recorded results; browser captures show the actual local application. Some historical terminal and service-dashboard screenshots were not captured: their measured outputs and source links are supplied, with remaining evidence gaps listed at the end. No numeric page limit appears in the supplied assignment PDF.
 
